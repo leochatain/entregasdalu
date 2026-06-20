@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Django / app
+backend/staticfiles/
+
+# SQLite — the irreplaceable artifact lives here, but the .db itself is local state
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Secrets / local config
+.env
+
+# OS
+.DS_Store

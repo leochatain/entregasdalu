@@ -1,0 +1,56 @@
+[project]
+name = "entregasdalu-backend"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.2,<5.3",
+    "django-allauth[socialaccount]>=65",
+    "django-ninja>=1.3",
+    "python-dotenv>=1.2.2",
+    "whitenoise>=6.12.0",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.0.5",
+    "pyright>=1.1.410",
+    "pytest>=9.1.1",
+    "pytest-django>=4.12.0",
+    "ruff>=0.15.18",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "DJ", "C4", "RUF"]
+# RUF012: Django Meta and pydantic `model_config` are dict class attrs by design.
+ignore = ["RUF012"]
+# Migrations are generated; leave them to Django's style.
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["E501", "RUF012"]
+
+[tool.pyright]
+include = ["config", "diary"]
+exclude = ["**/migrations", "**/__pycache__", ".venv"]
+pythonVersion = "3.13"
+venvPath = "."
+venv = ".venv"
+# "strict-ish": basic mode + extra signal, but tolerant of Django's dynamic ORM.
+typeCheckingMode = "basic"
+reportMissingTypeStubs = false
+reportUnnecessaryTypeIgnoreComment = true
+reportUnusedImport = true
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.test_settings"
+# Keep DEBUG=True in tests (pytest-django forces it off by default), so the
+# DEBUG-gated dev-login route is exercised exactly as it is during local dev.
+django_debug_mode = "true"
+python_files = ["test_*.py", "tests.py"]
+addopts = "-q"
+testpaths = ["diary/tests"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings"

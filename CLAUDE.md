@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **entregasdalu** is a single-user web app that helps one person ("Lu") build a daily academic-writing habit. She picks a daily difficulty tier tied to a curated sentimental photo; her word count proportionally reveals tiles of that photo, which then **freezes** permanently into a gallery — an honest diary of effort.
 
-**Current state: planning complete, app not yet scaffolded.** The repo has the three design docs, a `prototype/` visual reference, and `photos/` tier folders — but **no application code** (no `backend/`, no `frontend/`, no tooling configs). The first task is to scaffold the stack and dev environment described below — see "Project not yet scaffolded" for the concrete checklist. Read all three docs before building — they record *decisions already made and why* (including rejected alternatives), so the build doesn't re-open settled questions:
+**Current state: backend scaffolded and working; frontend in progress.** `backend/` implements the full v1 domain logic + API (offer, reveal, submit/freeze, auth, dev-login) with a green test suite — see "Backend commands" below. `frontend/` is a separate workstream. Read all three docs before building — they record *decisions already made and why* (including rejected alternatives), so the build doesn't re-open settled questions:
 
 - **`spec.md`** — the what/why. Decisions + rejected alternatives + cross-cutting principles.
 - **`design.md`** — architecture and the frontend↔backend contract. The authoritative source for data model, API surface, and domain logic.
@@ -53,9 +53,9 @@ entregasdalu/
 - **`data/` and `photos/` at root** so the same paths serve local dev (`DATABASE_PATH`/`PHOTOS_ROOT`) *and* the compose bind-mounts.
 - Types flow backend OpenAPI → `frontend/src/api/generated.ts` (generated, do not hand-edit).
 
-## Dev environment & tooling (decided; not yet installed)
+## Dev environment & tooling (backend installed; frontend per its own setup)
 
-A clean, modern toolchain is a deliberate goal from the start. These choices are settled:
+A clean, modern toolchain is a deliberate goal from the start. These choices are settled (backend pieces are installed and configured in `backend/pyproject.toml`):
 
 - **Python: `uv`** for everything — dependency management, lockfile, and virtualenv. Deps live in `backend/pyproject.toml` with a committed `uv.lock`; no `requirements.txt`, no manual `venv`/`pip`. Run tools via `uv run …`.
 - **Python lint + format: `ruff`** (both linter and formatter — don't add Black/isort/flake8). Config in `[tool.ruff]` in `pyproject.toml`.
@@ -67,16 +67,50 @@ A clean, modern toolchain is a deliberate goal from the start. These choices are
 
 Decision log: `uv` over Poetry/pip-tools (fastest, modern, lockfile built in). ESLint+Prettier over Biome (chosen for the mature plugin ecosystem — react-hooks + jsx-a11y rules — over Biome's single-binary speed).
 
-## Project not yet scaffolded — first-task checklist
+## Backend commands (scaffolded — these are real)
 
-None of the below exists yet. When asked to "set up the project" / start building, scaffold in this order and **update this CLAUDE.md with the exact commands** (build, lint, format, typecheck, test, dev-run, and how to run a single test) once they're real:
+The backend lives in `backend/` (Django project `config`, single app `diary`) and is driven by `uv`. Run everything via `uv run …`. There is a repo-root `Makefile` with one-word targets (`make help` lists them); the underlying commands:
 
-1. **`backend/`** — `uv init`, add Django + django-ninja + django-allauth + django-stubs + pytest/pytest-django; `django-admin startproject`; configure `ruff`/`pyright` in `pyproject.toml`; create the single `DailyEntry` app/model (design.md §3.1).
-2. **`frontend/`** — `npm create vite@latest` (React + TS template); add **Tailwind v4** (`@tailwindcss/vite`) with `@theme` tokens in `src/index.css`; add ESLint flat config + Prettier (+ `prettier-plugin-tailwindcss`) + the plugins above; add TanStack Query; wire the OpenAPI → `src/api/generated.ts` codegen step (`openapi-typescript`).
-3. **Root** — `.gitignore` (Python/Node/SQLite/`.env`), `.pre-commit-config.yaml`, and a `Makefile` (or `justfile`) with one-word targets for the common commands so they're discoverable.
-4. **Infra (later)** — docker-compose (caddy + gunicorn web), Caddyfile, `.env.example`. Deferred until the app runs locally.
+```bash
+# from backend/  (or use `make <target>` from the repo root)
+uv sync                                   # install deps + venv from uv.lock        (make install)
+uv run python manage.py migrate           # apply migrations                         (make migrate)
+uv run python manage.py makemigrations diary   # after a model change                (make makemigrations)
+uv run pytest                             # full test suite (60 tests)               (make test)
+uv run pytest diary/tests/test_reveal.py::test_seed_sorts_first   # a single test
+uv run pytest -k offer                    # tests matching a keyword
+uv run ruff check . && uv run ruff format .    # lint + format                       (make lint / make format)
+uv run pyright                            # typecheck (strict-ish, basic mode)        (make typecheck)
 
-> **Until this is done, there are no build/lint/test commands to run.** Don't invent them — scaffold first, then document the real ones here.
+# Run the app locally end-to-end (no Google, no secrets): DEBUG + dev-login bypass.
+# `make dev` wraps this; or copy .env.example → .env (its dev block is ready to run).
+DEBUG=True DEV_LOGIN_ENABLED=True ALLOWED_EMAILS=leochatain@gmail.com \
+  DEV_LOGIN_EMAIL=leochatain@gmail.com uv run python manage.py runserver
+# then: GET /api/config → POST /api/dev/login → /api/today → /api/pick → /api/submit → /api/gallery → /api/stats
+# In DEBUG, Django also serves /photos/* so the loop works without Caddy.
+```
+
+- **Tests run under `config.test_settings`** (sets `DEBUG=True` + dev-login before importing base settings; pytest config sets `django_debug_mode=true` so the DEBUG-gated dev-login route is exercised). Determinism tests are the priority and live in `diary/tests/` (`test_hashing`, `test_reveal`, `test_offer`, plus `test_nfc` for raw-bytes/NFC).
+- **OpenAPI** (FE codegen source): `make openapi` prints the schema; it's served at `/api/openapi.json` and `/api/docs`.
+- **Pyright** is configured in basic ("strict-ish") mode — Django's dynamic ORM makes full strict impractical for a toy; basic + `reportUnnecessaryTypeIgnoreComment` keeps real signal.
+
+### Backend layout (real)
+
+```text
+backend/
+├─ pyproject.toml  uv.lock  manage.py  .python-version
+├─ config/        settings.py · test_settings.py · urls.py · wsgi.py · asgi.py
+└─ diary/         models.py (DailyEntry) · constants.py (frozen contracts + tiers) ·
+                  hashing.py · offer.py · reveal.py · photos.py · timeutils.py ·
+                  services.py (orchestration) · schemas.py (camelCase aliasing) ·
+                  api.py (Ninja routes + auth) · adapters.py (allauth allowlist) ·
+                  migrations/ · tests/
+```
+
+### Still to do (not backend)
+
+- **`frontend/`** — Vite SPA (separate workstream): Tailwind v4 `@theme` tokens, ESLint/Prettier, TanStack Query, OpenAPI → `src/api/generated.ts` codegen.
+- **Infra (later)** — docker-compose (caddy + gunicorn web), `backend/Dockerfile`, `caddy/Dockerfile` + Caddyfile, prod env. Deferred. (Root `.env.example`, `.gitignore`, `.pre-commit-config.yaml`, `Makefile` already exist.)
 
 ## Architecture: the core mental model
 

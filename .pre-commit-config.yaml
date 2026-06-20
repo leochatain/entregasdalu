@@ -1,0 +1,23 @@
+# Git hooks (CLAUDE.md): keep nothing unformatted/untyped out of commits.
+# Backend lanes only for now; frontend ESLint/Prettier hooks land with the SPA.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.18
+    hooks:
+      - id: ruff
+        name: ruff (lint)
+        args: [--fix]
+        files: ^backend/
+      - id: ruff-format
+        name: ruff (format)
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        entry: bash -c 'cd backend && uv run pyright'
+        language: system
+        types: [python]
+        files: ^backend/
+        pass_filenames: false
