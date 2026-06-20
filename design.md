@@ -50,7 +50,7 @@ A single-user app. A React SPA talks to an API-only Django backend over `/api`; 
 
 ## 2. UI
 
-The interesting half of the app. Real interactivity (mosaic reveal, editor, gallery) is why we chose React (spec §7). The **visual source of truth** is the Claude Design prototype ("Entregasdalu writing tool") — pixel-accurate and interaction-complete. [frontend.md](frontend.md) extracts its tokens, CSS, component contracts, and pt-BR copy. This section captures only the **architecture** and the **frontend↔backend seam**; tokens/CSS/per-screen copy live in frontend.md.
+The interesting half of the app. Real interactivity (mosaic reveal, editor, gallery) is why we chose React (spec §7). The **visual source of truth** is the Claude Design prototype ("Entregasdalu writing tool") — pixel-accurate and interaction-complete. [frontend.md](frontend.md) extracts its tokens, CSS, component contracts, and pt-BR copy, and (in its top note) documents **how to access the prototype** via the `claude_design` MCP connector / `/design-login`. This section captures only the **architecture** and the **frontend↔backend seam**; tokens/CSS/per-screen copy live in frontend.md.
 
 ### 2.1 Screen set & resume routing
 
@@ -401,8 +401,8 @@ Three dynamic prefixes go to Django, not just `/api` — **allauth lives at `/ac
 
 ### 7.3 Images, mounts & persistence
 
-- **`web/Dockerfile`** — Python + deps; entrypoint `migrate` then `gunicorn`. Django serves its own minimal static (allauth error pages) via **whitenoise** — no `/static/` Caddy mapping needed.
-- **`caddy/Dockerfile`** — multi-stage: a `node` builder runs `vite build`, then `COPY --from=build dist → /srv/www` into the official `caddy` image. **SPA baked into the image** → one-command deploy, no Node on the server, no stale-build drift. (Chosen over bind-mounting `dist/`: the slower image build is irrelevant at toy deploy frequency; avoiding the manual "remember to rebuild" step is worth more.)
+- **`backend/Dockerfile`** (the compose **web** service — "web" is the service name, not a `web/` dir; build context `./backend`) — Python + deps; entrypoint `migrate` then `gunicorn`. Django serves its own minimal static (allauth error pages) via **whitenoise** — no `/static/` Caddy mapping needed.
+- **`caddy/Dockerfile`** (build context = repo root, so it can reach `frontend/`) — multi-stage: a `node` builder runs `vite build`, then `COPY --from=build dist → /srv/www` into the official `caddy` image. **SPA baked into the image** → one-command deploy, no Node on the server, no stale-build drift. (Chosen over bind-mounting `dist/`: the slower image build is irrelevant at toy deploy frequency; avoiding the manual "remember to rebuild" step is worth more.)
 - **SQLite — host bind-mount `./data:/data`**, DB at `/data/app.db`. Bind-mount (not a named volume) so the irreplaceable artifact is a plain visible file: `cp ./data/app.db …` is your zero-effort manual rescue, which partly offsets having no backup job (§3.4). One-time `chown`/compose `user:` if host/container UIDs mismatch.
 - **Photos — host `./photos`, bind-mounted read-only** into *both* services: `web` needs it for `listdir` at offer time (§4.1), `caddy` to serve it. `./photos:/srv/photos:ro`.
 - Caddy's own `caddy_data`/`caddy_config` (certs) are named volumes.

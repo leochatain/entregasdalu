@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="{{ containerStyle }}">
+  <sc-for list="{{ list }}" as="tile" hint-placeholder-count="48">
+    <div style="{{ tile.style }}"><div style="{{ tile.frost }}"></div></div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:300,&quot;height&quot;:400},&quot;src&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;photos/cafe.jpg&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;count&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:24,&quot;min&quot;:0,&quot;max&quot;:48,&quot;tsType&quot;:&quot;number&quot;},&quot;animate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;seedKey&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;gap&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1,&quot;min&quot;:0,&quot;max&quot;:6,&quot;tsType&quot;:&quot;number&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:6,&quot;min&quot;:0,&quot;max&quot;:16,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  state = { started: false };
+
+  componentDidMount() {
+    if (this.props.animate) this._kick();
+  }
+  componentDidUpdate(prev) {
+    if (this.props.animate && (prev.count !== this.props.count || prev.src !== this.props.src)) {
+      this.setState({ started: false }, () => this._kick());
+    }
+  }
+  _kick() {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (this._mounted !== false) this.setState({ started: true });
+    }));
+  }
+  componentWillUnmount() { this._mounted = false; }
+
+  hashStr(s) {
+    let h = 2166136261; s = String(s == null ? '' : s);
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0);
+  }
+
+  order() {
+    const cols = 6, rows = 8;
+    const seedHash = this.hashStr(this.props.seedKey || this.props.src || 'x');
+    const centers = [[3, 2], [3, 3], [4, 2], [4, 3]];
+    const seed = centers[seedHash % 4];
+    const cy = 3.5, cx = 2.5;
+    const tiles = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const cheb = Math.max(Math.abs(r - seed[0]), Math.abs(c - seed[1]));
+      const cc = Math.max(Math.abs(r - cy), Math.abs(c - cx));
+      const tie = this.hashStr((r * cols + c) + '-' + seedHash) % 1000;
+      tiles.push({ idx: r * cols + c, r, c, cheb, cc, tie });
+    }
+    tiles.sort((a, b) => a.cheb - b.cheb || a.cc - b.cc || a.tie - b.tie);
+    return { tiles, cols, rows };
+  }
+
+  renderVals() {
+    const { tiles, cols, rows } = this.order();
+    const total = cols * rows;
+    const animate = !!this.props.animate;
+    const count = Math.max(0, Math.min(total, this.props.count == null ? 0 : Math.round(this.props.count)));
+    const started = this.state.started || !animate;
+    const gap = this.props.gap == null ? 0 : this.props.gap;
+    const radius = this.props.radius == null ? 6 : this.props.radius;
+    const src = this.props.src || '';
+    const step = 17;
+
+    const list = tiles.map((t, rank) => {
+      const lit = rank < count;
+      const posX = cols > 1 ? (t.c / (cols - 1)) * 100 : 0;
+      const posY = rows > 1 ? (t.r / (rows - 1)) * 100 : 0;
+      const delay = animate ? rank * step : 0;
+      const style = {
+        position: 'relative',
+        gridColumn: String(t.c + 1),
+        gridRow: String(t.r + 1),
+        backgroundColor: '#e9ebee',
+        backgroundImage: 'url("' + src + '")',
+        backgroundSize: (cols * 100) + '% ' + (rows * 100) + '%',
+        backgroundPosition: posX + '% ' + posY + '%',
+        overflow: 'hidden',
+        border: '1px solid rgba(45,55,70,0.2)',
+        boxSizing: 'border-box',
+      };
+      const frost = {
+        position: 'absolute', inset: '0',
+        background: 'rgba(239,241,245,0.965)',
+        backdropFilter: 'blur(9px) saturate(0.5)',
+        WebkitBackdropFilter: 'blur(9px) saturate(0.5)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55)',
+        opacity: lit ? (started ? 0 : 1) : 1,
+        transform: lit ? (started ? 'scale(1.1)' : 'scale(1)') : 'scale(1)',
+        transition: lit ? 'opacity 320ms ease, transform 380ms ease' : 'none',
+        transitionDelay: lit ? delay + 'ms' : '0ms',
+        pointerEvents: 'none',
+        willChange: 'opacity, transform',
+      };
+      return { style, frost, idx: t.idx };
+    });
+    list.sort((a, b) => a.idx - b.idx);
+
+    const containerStyle = {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(' + cols + ',1fr)',
+      gridTemplateRows: 'repeat(' + rows + ',1fr)',
+      gap: gap + 'px',
+      aspectRatio: cols + ' / ' + rows,
+      width: '100%',
+      backgroundColor: '#e2e5e9',
+      padding: gap + 'px',
+      borderRadius: radius + 'px',
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+    };
+    return { list, containerStyle };
+  }
+}
+</script>
+</body>
+</html>

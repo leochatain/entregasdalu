@@ -8,6 +8,19 @@ Companion to [design.md](design.md) (architecture) and [spec.md](spec.md) (decis
 > This document extracts its design tokens, component contracts, and copy, and specifies what
 > changes when it becomes a real app talking to the Django-Ninja API.
 
+> **How to access the prototype (implementing agent, do this first).** The prototype is **not** in
+> this repo — it lives in the Claude Design project above, reachable via the **`claude_design` MCP
+> connector** (`https://api.anthropic.com/v1/design/mcp`):
+> 1. Ensure the connector is connected. If it needs authorization, run **`/design-login`** (grants
+>    `user:design:read/write`). Read access depends on these scopes — a **headless/background agent
+>    without them won't see the project**, so run this in an interactive session (or use the locally
+>    materialized copy under `prototype/` if one was synced in).
+> 2. Import the project (`projectId c61adf3e-6a40-47c8-b2cd-1380bf166f45`) with the `claude_design`
+>    MCP tools. **Primary file: `Entregasdalu.dc.html`**; also pull `Mosaic.dc.html` and `support.js`.
+> 3. The project also contains `photos/` (10 sample JPGs — fine as **dev placeholders**, distribute
+>    across the `rascunho/ capitulo/ tese/` tier folders) and `screenshots/` (rendered reference PNGs:
+>    `menu`, `rev`, `cal`, `frost*`, `0N-cta`).
+
 > **Status:** first detailed pass. Where a decision is genuinely open it's marked **Decision (rec: …)**
 > — sane default chosen, cheap to revisit.
 
