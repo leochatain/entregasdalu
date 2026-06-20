@@ -50,7 +50,7 @@ A single-user app. A React SPA talks to an API-only Django backend over `/api`; 
 
 ## 2. UI
 
-The interesting half of the app. Real interactivity (mosaic reveal, editor, gallery) is why we chose React (spec §7). The **visual source of truth** is the Claude Design prototype ("Entregasdalu writing tool") — pixel-accurate and interaction-complete. [frontend.md](frontend.md) extracts its tokens, CSS, component contracts, and pt-BR copy, and (in its top note) documents **how to access the prototype** via the `claude_design` MCP connector / `/design-login`. This section captures only the **architecture** and the **frontend↔backend seam**; tokens/CSS/per-screen copy live in frontend.md.
+The interesting half of the app. Real interactivity (mosaic reveal, editor, gallery) is why we chose React (spec §7). The **visual reference** is the Claude Design prototype ("Entregasdalu writing tool") — high-fidelity and interaction-complete, but a *guide, not a pixel-perfect spec*: aim for an interface that looks good and is well-coded (reuse the pt-BR copy verbatim). [frontend.md](frontend.md) extracts its tokens, component contracts, and copy, and (in its top note) documents **how to access the prototype** via the `claude_design` MCP connector / `/design-login`. This section captures only the **architecture** and the **frontend↔backend seam**; tokens/styling/per-screen copy live in frontend.md.
 
 ### 2.1 Screen set & resume routing
 
@@ -128,7 +128,7 @@ The concrete payload shapes the FE depends on (offer slot fields, `revealedTiles
 
 ### 2.7 Styling, responsiveness, a11y (pointers)
 
-Bespoke editorial aesthetic → **CSS Modules + token custom properties** (not Tailwind). Fluid `clamp()` type; three breakpoints (tier grid 3→1, editor two-col→stacked, gallery reflow). A11y: real `<button>`/`<textarea>`, focus-visible rings, modal focus-trap + `Esc`, `aria-live` on word count, Mosaic `role="img"` + `aria-label` ("foto revelada 62%"), `prefers-reduced-motion`. Full token table, CSS specs, and per-screen copy: **[frontend.md](frontend.md) §3–4, §9, §11**.
+Styling: **Tailwind v4 driven by the §3 design tokens** (`@theme`) — see frontend.md §4. Bespoke editorial look preserved via token-mapped utilities (not Tailwind defaults); computed styles (Mosaic tiles, calendar tint) stay inline. Fluid type via named size tokens; three breakpoints (tier grid 3→1, editor two-col→stacked, gallery reflow). A11y: real `<button>`/`<textarea>`, focus-visible rings, modal focus-trap + `Esc`, `aria-live` on word count, Mosaic `role="img"` + `aria-label` ("foto revelada 62%"), `prefers-reduced-motion`. Full token table, CSS specs, and per-screen copy: **[frontend.md](frontend.md) §3–4, §9, §11**.
 
 ---
 

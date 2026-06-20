@@ -58,7 +58,7 @@ Companion to [design.md](design.md) (architecture) and [spec.md](spec.md) (decis
 
 ## 1. Relationship to the prototype
 
-The prototype is **pixel-accurate and interaction-complete** — treat it as the spec for look, copy, and motion. But it is a single-file `DCLogic` toy: all state is local, "navigation" is a flat demo bar that jumps between every screen, the mosaic recomputes its reveal client-side from a `count`, and validation runs in the browser. Production inverts most of that:
+The prototype is a **high-fidelity, interaction-complete visual reference** — match its look, copy, and motion *in spirit*. **It is a guide, not a pixel-perfect spec:** the goal is an interface that looks good and is well-coded, not a pixel-for-pixel reproduction. Lean on the design tokens (§3) and per-screen intent (§9); deviate freely where it yields cleaner code or better responsiveness. It is also a single-file `DCLogic` toy: all state is local, "navigation" is a flat demo bar that jumps between every screen, the mosaic recomputes its reveal client-side from a `count`, and validation runs in the browser. Production inverts most of that:
 
 | Prototype (DCLogic) | Production (React SPA) |
 |---|---|
@@ -66,10 +66,10 @@ The prototype is **pixel-accurate and interaction-complete** — treat it as the
 | Mosaic recomputes order from `count` + client hash | Server computes & **freezes** `revealedTiles`; client renders the stored list verbatim (spec §4) |
 | `isGibberish()` in the browser | `POST /api/submit` validates server-side; client only renders pass/fail UI |
 | Hard-coded tier/gallery/calendar data | `GET /api/today` · `/api/gallery` · `/api/stats` |
-| Inline `style={{…}}` objects | Design tokens + CSS Modules (see §4) |
+| Inline `style={{…}}` objects | Tailwind v4 utilities on `@theme` tokens (§4); computed styles stay inline |
 | `dc-import name="Mosaic"` | `<Mosaic/>` React component (see §8) |
 
-What carries over **unchanged**: every color, font, size, radius, the editorial layout of each screen, all Portuguese copy, and the mosaic's frosted-tile reveal feel.
+What carries over (faithfully *in spirit*, not pixel-exact): the **design tokens** (color, fonts, the type/spacing scale — §3), the **editorial layout and intent** of each screen, all **Portuguese copy** (reuse verbatim), and the mosaic's frosted-tile reveal feel.
 
 ---
 
@@ -83,17 +83,15 @@ frontend/
   vite.config.ts
   package.json
   src/
-    main.tsx                # mount, font preconnect, global CSS
+    main.tsx                # mount, import ./index.css
     App.tsx                 # resume routing (state machine, §5)
+    index.css               # @import "tailwindcss"; @theme {§3 tokens}; @layer base {reset, body, ::selection, scrollbar}; @keyframes edlrise
     api/
       client.ts             # fetch wrapper (base /api, credentials, error shape)
       generated.ts          # OpenAPI → TS types (do not edit; see §6)
       hooks.ts              # useToday / usePick / useSubmit / useGallery / useStats
     state/
       session.ts            # auth/“who am I” + today-state cache
-    styles/
-      tokens.css            # CSS custom properties (the §3 table)
-      global.css            # reset, body bg, ::selection, scrollbar, @keyframes
     components/
       Mosaic/               # the shared component (§8)
       NavBar.tsx
@@ -119,7 +117,7 @@ frontend/
 
 ## 3. Design tokens
 
-Extracted verbatim from the prototype. These become `src/styles/tokens.css` custom properties.
+Extracted from the prototype. These become the Tailwind **`@theme`** tokens (CSS variables) in `src/index.css` — utilities like `bg-accent` / `text-muted` / `text-hero` resolve to them, so the bespoke palette drives Tailwind (never its defaults). Values are targets, not pixel law (see §1).
 
 ### Color
 
@@ -165,14 +163,16 @@ Representative sizes (clamps preserve the prototype's responsive scale):
 
 ## 4. Styling approach
 
-**Decision (rec: CSS Modules + token custom properties).** The aesthetic is bespoke editorial, not utility-grid; Tailwind would fight the `clamp()`-heavy type and the italic-serif voice. Plan:
+**Decision: Tailwind v4, driven by the §3 design tokens** (this *supersedes* an earlier "CSS Modules, not Tailwind" call — recorded so it doesn't read as drift). The earlier rejection conflated Tailwind with Tailwind's *default look*: Tailwind is just a utility layer, unopinionated about aesthetics. By mapping the §3 palette/fonts/sizes into Tailwind's `@theme`, utilities resolve to *our* tokens (never Tailwind's defaults — those defaults are what produce the generic look). The payoff: it cuts the prototype's heavy repeated inline-style boilerplate (the eyebrow / chip / button patterns recur ~10×) and makes responsiveness ergonomic (`md:` / `lg:` variants). Plan:
 
-- `tokens.css` (`:root` custom properties from §3) + `global.css` (reset, body, `::selection{background:var(--accent);color:var(--bg)}`, scrollbar, `edlrise`).
-- One `*.module.css` per screen/component; reference `var(--…)`.
-- Shared primitives (`CtaButton`, `Chip`, eyebrow label) absorb the repeated inline patterns so each screen stays declarative.
-- The CTA color enum in the prototype (`Preto`/`Vermelho`/`Verde`) is a design knob — ship **Preto** (`--ink` fill) as the default; keep it a single token swap if Lu wants red/green later.
+- `src/index.css`: `@import "tailwindcss";` + `@theme { …§3 tokens… }` + `@layer base { reset, body bg, ::selection{accent/bg}, scrollbar }` + `@keyframes edlrise`. Wire with `@tailwindcss/vite`.
+- Put bespoke sizes in **named theme tokens** (`--text-hero`, `--text-screen-h1`, …) and use `text-hero` — don't scatter arbitrary values like `text-[clamp(48px,8.4vw,128px)]` across JSX (keeps markup readable).
+- Shared primitives (`CtaButton`, `Chip`, `Eyebrow`) still absorb repeated patterns as small components (Tailwind classes inside) so screens stay declarative.
+- **Computed styles stay inline `style={{…}}`:** the Mosaic's per-tile `background-position`/`background-size` (§8) and the calendar's per-cell `rgba()` tint (§9) are computed from data — Tailwind can't express per-element computed values, and that's fine. Tailwind covers the *chrome*, not these two.
+- CTA color knob (`Preto`/`Vermelho`/`Verde`): ship **Preto** (`--ink`) default; a single token swap later.
+- Tooling: `prettier-plugin-tailwindcss` for class sorting; keep `eslint-plugin-jsx-a11y`.
 
-Not chosen: Tailwind (bespoke design, low reuse payoff), CSS-in-JS runtime (unneeded for a static toy). Revisit only if component count balloons.
+Not chosen: CSS-in-JS runtime (unneeded for a static toy).
 
 ---
 
@@ -340,7 +340,7 @@ The explicit list of "do **not** copy the prototype here":
 
 Suggested FE milestones (independent of backend readiness — mock the 5 endpoints first):
 
-1. **Foundation** — Vite+TS scaffold, fonts, `tokens.css`/`global.css`, `CtaButton`/`Chip`/`Eyebrow`, NavBar shell.
+1. **Foundation** — Vite+TS scaffold, Tailwind v4 (`@tailwindcss/vite`) with `@theme` tokens + base layer in `src/index.css`, fonts, `CtaButton`/`Chip`/`Eyebrow`, NavBar shell.
 2. **Mosaic** — the production component (teaser + frozen + animated), tested against the spec's slice/seed math with a fixed `litTiles` fixture. This unblocks 4 screens.
 3. **API layer** — `client.ts`, OpenAPI codegen, hooks, with a mock server returning the prototype's demo data shaped to the real contracts.
 4. **Core loop** — Menu → Editor → Reveal, wired to `pick`/`submit`; fail + Lockout states.

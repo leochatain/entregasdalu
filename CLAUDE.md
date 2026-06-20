@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`spec.md`** — the what/why. Decisions + rejected alternatives + cross-cutting principles.
 - **`design.md`** — architecture and the frontend↔backend contract. The authoritative source for data model, API surface, and domain logic.
 - **`frontend.md`** — implementation-level FE plan: design tokens, CSS, per-screen pt-BR copy, component contracts. Its top note says **how to access/import the prototype**.
-- **`prototype/`** — local mirror of the Claude Design prototype (DCLogic `.dc.html` — *reference only, not React*; see `prototype/README.md`). **`photos/{rascunho,capitulo,tese}/`** — tier folders with placeholder images (real curation = drop JP/PNGs in).
+- **`prototype/`** — local mirror of the Claude Design prototype (DCLogic `.dc.html` — *reference only, not React*; see `prototype/README.md`). Treat it as a high-fidelity visual **guide, not a pixel-perfect spec**: aim for looks-good + well-coded, deviate where it yields cleaner code or better responsiveness; reuse the pt-BR **copy verbatim**. **`photos/{rascunho,capitulo,tese}/`** — tier folders with placeholder images (real curation = drop JPG/PNGs in).
 
 When a doc conflict appears: **design.md's v1 simplifications win** over spec.md/frontend.md (which were written against the fuller spec). See "v1 scope" below.
 
@@ -26,7 +26,7 @@ When a doc conflict appears: **design.md's v1 simplifications win** over spec.md
 ## Planned stack
 
 - **Backend:** Django, API-only (JSON) via **Django-Ninja** (emits OpenAPI → TS codegen). gunicorn.
-- **Frontend:** TS React + **Vite** static build. **CSS Modules + token custom properties** (not Tailwind). **TanStack Query** for the ~5 endpoints.
+- **Frontend:** TS React + **Vite** static build. **Tailwind v4**, driven by the design tokens via `@theme` (frontend.md §4) — bespoke look via token-mapped utilities, *not* Tailwind defaults; computed styles (Mosaic tiles, calendar tint) stay inline. **TanStack Query** for the ~5 endpoints.
 - **DB:** SQLite — one table (`DailyEntry`), keyed by São Paulo calendar date.
 - **Photos:** instance filesystem, three tier folders. A photo's identity *is its path*; no `Photo` table, no admin UI — curation = drop a JPG in a folder.
 - **Auth:** django-allauth (Google), single-email allowlist. DEBUG-gated dev-login bypass so local dev needs no Google.
@@ -60,7 +60,8 @@ A clean, modern toolchain is a deliberate goal from the start. These choices are
 - **Python: `uv`** for everything — dependency management, lockfile, and virtualenv. Deps live in `backend/pyproject.toml` with a committed `uv.lock`; no `requirements.txt`, no manual `venv`/`pip`. Run tools via `uv run …`.
 - **Python lint + format: `ruff`** (both linter and formatter — don't add Black/isort/flake8). Config in `[tool.ruff]` in `pyproject.toml`.
 - **Python types: `pyright`** in strict-ish mode (Django needs `django-stubs`). Config in `pyproject.toml` or `pyrightconfig.json`.
-- **TS lint: ESLint (flat config, `eslint.config.js`)** with `typescript-eslint`, `eslint-plugin-react-hooks`, and `eslint-plugin-jsx-a11y` (a11y matters per frontend.md §11). **TS format: Prettier** (`.prettierrc`). Keep them in separate lanes — `eslint-config-prettier` to disable formatting rules in ESLint.
+- **CSS: Tailwind v4** via `@tailwindcss/vite`, driven by `@theme` tokens (frontend.md §3–4). No CSS Modules.
+- **TS lint: ESLint (flat config, `eslint.config.js`)** with `typescript-eslint`, `eslint-plugin-react-hooks`, and `eslint-plugin-jsx-a11y` (a11y matters per frontend.md §11). **TS format: Prettier** (`.prettierrc`) + `prettier-plugin-tailwindcss` (class sorting). Keep ESLint/Prettier in separate lanes — `eslint-config-prettier` to disable formatting rules in ESLint.
 - **Git hooks: `pre-commit`** running ruff (lint + format), pyright, ESLint, and Prettier on staged files so nothing unformatted/untyped lands.
 - **Tests:** `pytest` + `pytest-django` (backend); Vitest (frontend). Determinism tests are the priority (see "Testing priorities").
 
@@ -71,7 +72,7 @@ Decision log: `uv` over Poetry/pip-tools (fastest, modern, lockfile built in). E
 None of the below exists yet. When asked to "set up the project" / start building, scaffold in this order and **update this CLAUDE.md with the exact commands** (build, lint, format, typecheck, test, dev-run, and how to run a single test) once they're real:
 
 1. **`backend/`** — `uv init`, add Django + django-ninja + django-allauth + django-stubs + pytest/pytest-django; `django-admin startproject`; configure `ruff`/`pyright` in `pyproject.toml`; create the single `DailyEntry` app/model (design.md §3.1).
-2. **`frontend/`** — `npm create vite@latest` (React + TS template); add ESLint flat config + Prettier + the plugins above; add TanStack Query; wire the OpenAPI → `src/api/generated.ts` codegen step (`openapi-typescript`).
+2. **`frontend/`** — `npm create vite@latest` (React + TS template); add **Tailwind v4** (`@tailwindcss/vite`) with `@theme` tokens in `src/index.css`; add ESLint flat config + Prettier (+ `prettier-plugin-tailwindcss`) + the plugins above; add TanStack Query; wire the OpenAPI → `src/api/generated.ts` codegen step (`openapi-typescript`).
 3. **Root** — `.gitignore` (Python/Node/SQLite/`.env`), `.pre-commit-config.yaml`, and a `Makefile` (or `justfile`) with one-word targets for the common commands so they're discoverable.
 4. **Infra (later)** — docker-compose (caddy + gunicorn web), Caddyfile, `.env.example`. Deferred until the app runs locally.
 

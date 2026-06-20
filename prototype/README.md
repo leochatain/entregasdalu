@@ -1,8 +1,10 @@
 # prototype/ — visual reference (do not ship)
 
 A local mirror of the Claude Design project **"Entregasdalu writing tool"**
-(`claude.ai/design/p/c61adf3e-6a40-47c8-b2cd-1380bf166f45`), the pixel-accurate visual
-source of truth referenced throughout [frontend.md](../frontend.md).
+(`claude.ai/design/p/c61adf3e-6a40-47c8-b2cd-1380bf166f45`), the high-fidelity visual
+**reference** referenced throughout [frontend.md](../frontend.md). It's a *guide, not a
+pixel-perfect spec* — aim for looks-good + well-coded (reuse the pt-BR copy verbatim),
+and deviate where it yields cleaner code or better responsiveness.
 
 - **`Entregasdalu.dc.html`** — all 9 prototype screens (markup + DCLogic component logic + pt-BR copy).
 - **`Mosaic.dc.html`** — the mosaic reveal component (grid/slice math, seed ordering, frost animation).
