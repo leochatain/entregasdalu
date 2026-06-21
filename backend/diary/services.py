@@ -65,10 +65,14 @@ def today_state(date_str: str) -> dict[str, Any]:
     entry = DailyEntry.objects.filter(date=date_str).first()
     if entry is None:
         offer = compute_offer(date_str, _unlocked_set())
-        return {"state": "none", "offer": [s.public() if s else None for s in offer]}
+        return {
+            "today": date_str,
+            "state": "none",
+            "offer": [s.public() if s else None for s in offer],
+        }
     if entry.status == "picked":
-        return {"state": "picked", "picked": _picked_payload(entry)}
-    return {"state": "submitted", "submitted": _frozen_payload(entry)}
+        return {"today": date_str, "state": "picked", "picked": _picked_payload(entry)}
+    return {"today": date_str, "state": "submitted", "submitted": _frozen_payload(entry)}
 
 
 def pick(date_str: str, tier_id: str) -> dict[str, Any]:
@@ -159,6 +163,7 @@ def stats(date_str: str) -> dict[str, Any]:
         e for e in entries if e.date.year == today.year and e.date.month == today.month
     ]
     return {
+        "today": date_str,
         "current_streak": current,
         "longest_streak": longest,
         "total_words": total_words,

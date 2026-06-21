@@ -1,6 +1,6 @@
 import { useStats } from '../api/hooks'
 import Eyebrow from '../components/Eyebrow'
-import { formatMonthName, formatNumber, todayISO } from '../lib/format'
+import { formatMonthName, formatNumber } from '../lib/format'
 
 const WEEKDAYS = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom']
 
@@ -27,7 +27,7 @@ export default function Stats() {
   const pctByDate = new Map(
     data.calendar.map((d) => [d.date, d.performancePct]),
   )
-  const today = todayISO()
+  const today = data.today
   const pad = (n: number) => String(n).padStart(2, '0')
 
   return (

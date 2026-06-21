@@ -59,6 +59,7 @@ class FrozenEntryOut(CamelSchema):
 
 
 class TodayOut(CamelSchema):
+    today: date  # server's effective São Paulo date (honors the dev clock)
     state: str  # 'none' | 'picked' | 'submitted'
     offer: list[OfferSlotOut | None] | None = None
     picked: PickedOut | None = None
@@ -77,6 +78,7 @@ class CalendarDayOut(CamelSchema):
 
 
 class StatsOut(CamelSchema):
+    today: date  # server's effective São Paulo date (honors the dev clock)
     current_streak: int
     longest_streak: int
     total_words: int

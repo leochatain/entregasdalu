@@ -123,6 +123,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dev/advance-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dev Advance Day
+         * @description Shift the in-memory dev clock forward one day (testing the daily loop).
+         */
+        post: operations["diary_api_dev_advance_day"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dev/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dev Reset
+         * @description Wipe all entries and return the dev clock to today — a clean slate.
+         */
+        post: operations["diary_api_dev_reset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -184,6 +224,11 @@ export interface components {
         };
         /** TodayOut */
         TodayOut: {
+            /**
+             * Today
+             * Format: date
+             */
+            today: string;
             /** State */
             state: string;
             /** Offer */
@@ -222,6 +267,11 @@ export interface components {
         };
         /** StatsOut */
         StatsOut: {
+            /**
+             * Today
+             * Format: date
+             */
+            today: string;
             /** Currentstreak */
             currentStreak: number;
             /** Longeststreak */
@@ -383,6 +433,42 @@ export interface operations {
         };
     };
     diary_api_dev_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    diary_api_dev_advance_day: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    diary_api_dev_reset: {
         parameters: {
             query?: never;
             header?: never;

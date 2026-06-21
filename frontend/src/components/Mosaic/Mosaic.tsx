@@ -124,10 +124,11 @@ export default function Mosaic({
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55)',
                 opacity: revealed ? 0 : 1,
                 transform: revealed ? 'scale(1.1)' : 'scale(1)',
+                // Delay folded into the shorthand — don't mix `transition` with
+                // the `transitionDelay` longhand (React warns on re-render).
                 transition: lit
-                  ? 'opacity 320ms ease, transform 380ms ease'
+                  ? `opacity 320ms ease ${delay}ms, transform 380ms ease ${delay}ms`
                   : 'none',
-                transitionDelay: `${delay}ms`,
                 pointerEvents: 'none',
                 willChange: 'opacity, transform',
               }}

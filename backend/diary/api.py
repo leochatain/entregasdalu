@@ -17,6 +17,7 @@ from ninja.errors import HttpError
 from ninja.security import SessionAuth
 
 from . import services
+from .models import DailyEntry
 from .schemas import (
     ConfigOut,
     FrozenEntryOut,
@@ -27,7 +28,7 @@ from .schemas import (
     SubmitIn,
     TodayOut,
 )
-from .timeutils import today_str
+from .timeutils import advance_dev_days, reset_dev_clock, today_str
 
 
 class AllowlistAuth(SessionAuth):
@@ -91,3 +92,16 @@ if settings.DEBUG and settings.DEV_LOGIN_ENABLED:
         user, _ = user_model.objects.get_or_create(username=email, defaults={"email": email})
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return {"ok": True, "email": email}
+
+    @api.post("/dev/advance-day")
+    def dev_advance_day(request: HttpRequest) -> dict[str, Any]:
+        """Shift the in-memory dev clock forward one day (testing the daily loop)."""
+        advance_dev_days(1)
+        return {"today": today_str()}
+
+    @api.post("/dev/reset")
+    def dev_reset(request: HttpRequest) -> dict[str, Any]:
+        """Wipe all entries and return the dev clock to today — a clean slate."""
+        DailyEntry.objects.all().delete()
+        reset_dev_clock()
+        return {"today": today_str()}

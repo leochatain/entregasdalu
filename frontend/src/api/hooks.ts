@@ -84,3 +84,21 @@ export function useDevLogin() {
     onSuccess: () => qc.invalidateQueries(),
   })
 }
+
+/** DEBUG-only: shift the server's dev clock forward a day, then refetch. */
+export function useAdvanceDay() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ today: string }>('/dev/advance-day'),
+    onSuccess: () => qc.invalidateQueries(),
+  })
+}
+
+/** DEBUG-only: wipe all entries + reset the clock for a clean slate. */
+export function useResetDb() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ today: string }>('/dev/reset'),
+    onSuccess: () => qc.invalidateQueries(),
+  })
+}

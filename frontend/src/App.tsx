@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { ApiError } from './api/client'
-import { useToday, type FrozenEntry } from './api/hooks'
+import {
+  useAdvanceDay,
+  useConfig,
+  useResetDb,
+  useToday,
+  type FrozenEntry,
+} from './api/hooks'
 import NavBar, { type NavView } from './components/NavBar'
 import Editor from './screens/Editor'
 import Gallery from './screens/Gallery'
@@ -17,6 +23,9 @@ import Stats from './screens/Stats'
  */
 export default function App() {
   const today = useToday()
+  const config = useConfig()
+  const advanceDay = useAdvanceDay()
+  const resetDb = useResetDb()
   const [view, setView] = useState<NavView>('today')
   const [reveal, setReveal] = useState<FrozenEntry | null>(null)
 
@@ -39,6 +48,9 @@ export default function App() {
         onSignOut={() => {
           window.location.href = '/accounts/logout/'
         }}
+        showDev={!!config.data?.devLogin}
+        onAdvanceDay={() => advanceDay.mutate()}
+        onResetDb={() => resetDb.mutate()}
       />
       {view === 'gallery' ? (
         <Gallery />
@@ -57,7 +69,7 @@ export default function App() {
       ) : data.state === 'submitted' && data.submitted ? (
         <JaEntregue entry={data.submitted} />
       ) : (
-        <Menu offer={data.offer ?? []} />
+        <Menu offer={data.offer ?? []} today={data.today} />
       )}
     </div>
   )

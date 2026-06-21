@@ -3,7 +3,7 @@ import { usePick, type OfferSlot } from '../api/hooks'
 import CtaButton from '../components/CtaButton'
 import Eyebrow from '../components/Eyebrow'
 import TierCard from '../components/TierCard'
-import { formatLongDate, todayISO } from '../lib/format'
+import { formatLongDate } from '../lib/format'
 
 /** Tier tag per tier id (not in the offer payload; a UI constant). */
 const TAGS: Record<string, string> = {
@@ -13,7 +13,13 @@ const TAGS: Record<string, string> = {
 }
 
 /** Today's offer → pick a tier → pin it (POST /api/pick) → resume routes to Editor. */
-export default function Menu({ offer }: { offer: (OfferSlot | null)[] }) {
+export default function Menu({
+  offer,
+  today,
+}: {
+  offer: (OfferSlot | null)[]
+  today: string
+}) {
   const slots = offer.filter((s): s is OfferSlot => s != null)
   const pick = usePick()
   const [selected, setSelected] = useState<string | null>(
@@ -22,7 +28,7 @@ export default function Menu({ offer }: { offer: (OfferSlot | null)[] }) {
 
   return (
     <main className="mx-auto flex max-w-[1020px] flex-col px-7 py-14">
-      <Eyebrow>{formatLongDate(todayISO())}</Eyebrow>
+      <Eyebrow>{formatLongDate(today)}</Eyebrow>
       <h1 className="text-screen-h1 text-ink mt-3 mb-2 font-serif font-medium">
         Escolha o desafio do dia
       </h1>
