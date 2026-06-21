@@ -41,10 +41,3 @@ def list_tier_files(tier_id: str) -> list[str]:
             continue
         result.append(f"{tier_id}/{name}")
     return result
-
-
-def pool_total() -> int:
-    """Total valid photos across all tiers — the size of the 'acervo'."""
-    from .constants import TIERS
-
-    return sum(len(list_tier_files(t.id)) for t in TIERS)
