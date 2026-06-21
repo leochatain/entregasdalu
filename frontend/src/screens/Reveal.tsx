@@ -37,10 +37,6 @@ export default function Reveal({
 
       <EntryChips entry={entry} />
 
-      <p className="text-muted-2 font-serif text-[15px] italic">
-        — congelado, pra sempre. é seu. —
-      </p>
-
       <CtaButton onClick={onDone}>Ver na galeria →</CtaButton>
     </main>
   )

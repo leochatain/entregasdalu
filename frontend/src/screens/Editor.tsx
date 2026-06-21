@@ -40,7 +40,7 @@ export default function Editor({
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Cola ou escreve aqui…"
+          placeholder="Cole ou escreva aqui…"
           className="text-editor text-ink bg-surface min-h-[48vh] w-full resize-y rounded-[4px] p-[30px] font-serif shadow-[inset_0_0_0_1px_var(--color-line)] outline-none"
         />
 
@@ -61,7 +61,7 @@ export default function Editor({
           <Mosaic photoUrl={picked.photoUrl} litTiles={[picked.seedTile]} />
         </div>
         <p className="text-muted mt-4 max-w-[21ch] font-serif text-[15px] italic">
-          Cola o texto do dia aqui. Quanto mais você escreveu, mais foto aparece
+          Cole o texto do dia aqui. Quanto mais você escreve, mais foto aparece
           na entrega.
         </p>
       </aside>
