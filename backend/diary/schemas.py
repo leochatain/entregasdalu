@@ -69,7 +69,6 @@ class TodayOut(CamelSchema):
 class GalleryOut(CamelSchema):
     items: list[FrozenEntryOut]
     photos_collected: int
-    pool_total: int
 
 
 class CalendarDayOut(CamelSchema):
@@ -84,7 +83,6 @@ class StatsOut(CamelSchema):
     total_words: int
     days_delivered: int
     photos_collected: int
-    pool_unlocked_pct: float
     year: int
     month: int
     days_in_month: int

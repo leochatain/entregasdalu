@@ -135,12 +135,13 @@ def _make_submitted(date_str: str, tier: str, words: int):
     services.submit(date_str, "w " * words)
 
 
-def test_gallery_lists_submitted_with_pool_total(photos):
+def test_gallery_lists_submitted(photos):
     _make_submitted(DATE, "rascunho", 150)
     gal = services.gallery()
     assert gal["photos_collected"] == 1
-    assert gal["pool_total"] == 12  # 4 per tier
     assert len(gal["items"]) == 1
+    # Pool size is intentionally not exposed (we add photos over time).
+    assert "pool_total" not in gal
 
 
 def test_gallery_excludes_picked_only(photos):

@@ -18,7 +18,7 @@ from .constants import TIERS_BY_ID, tier_for_path
 from .hashing import seed_for
 from .models import DailyEntry
 from .offer import compute_offer
-from .photos import pool_total, url_for
+from .photos import url_for
 from .reveal import compute_reveal
 
 
@@ -127,7 +127,7 @@ def submit(date_str: str, text: str) -> dict[str, Any]:
 def gallery() -> dict[str, Any]:
     entries = DailyEntry.objects.filter(status="submitted").order_by("-date")
     items = [_frozen_payload(e) for e in entries]
-    return {"items": items, "photos_collected": len(items), "pool_total": pool_total()}
+    return {"items": items, "photos_collected": len(items)}
 
 
 def _streaks(dates: set[date], today: date) -> tuple[int, int]:
@@ -157,7 +157,6 @@ def stats(date_str: str) -> dict[str, Any]:
     current, longest = _streaks(dates, today)
     total_words = sum(e.effective_word_count or 0 for e in entries)
     collected = len(entries)
-    total = pool_total()
 
     month_entries = [
         e for e in entries if e.date.year == today.year and e.date.month == today.month
@@ -169,7 +168,6 @@ def stats(date_str: str) -> dict[str, Any]:
         "total_words": total_words,
         "days_delivered": collected,
         "photos_collected": collected,
-        "pool_unlocked_pct": (collected / total) if total else 0.0,
         # Current month only (v1); FE builds the grid from real offset + length (§5.1).
         "year": today.year,
         "month": today.month,

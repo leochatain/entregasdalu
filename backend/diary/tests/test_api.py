@@ -78,7 +78,7 @@ def test_full_loop(auth_client, photos):
 
     gallery = auth_client.get("/api/gallery").json()
     assert gallery["photosCollected"] == 1
-    assert gallery["poolTotal"] == 12
+    assert "poolTotal" not in gallery
 
     stats = auth_client.get("/api/stats").json()
     assert stats["daysDelivered"] == 1

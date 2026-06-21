@@ -252,8 +252,6 @@ export interface components {
             items: components["schemas"]["FrozenEntryOut"][];
             /** Photoscollected */
             photosCollected: number;
-            /** Pooltotal */
-            poolTotal: number;
         };
         /** CalendarDayOut */
         CalendarDayOut: {
@@ -282,8 +280,6 @@ export interface components {
             daysDelivered: number;
             /** Photoscollected */
             photosCollected: number;
-            /** Poolunlockedpct */
-            poolUnlockedPct: number;
             /** Year */
             year: number;
             /** Month */

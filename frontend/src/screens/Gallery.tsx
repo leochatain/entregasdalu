@@ -17,9 +17,6 @@ export default function Gallery() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  const acervo =
-    data && data.poolTotal > 0 ? data.photosCollected / data.poolTotal : 0
-
   return (
     <main className="mx-auto max-w-[1080px] px-6 py-14">
       <Eyebrow>diário de esforço</Eyebrow>
@@ -28,7 +25,7 @@ export default function Gallery() {
       </h1>
       {data && (
         <p className="text-muted mt-2 font-mono text-[15px]">
-          {data.photosCollected} fotos · {percentLabel(acervo)} do acervo
+          {data.photosCollected} {data.photosCollected === 1 ? 'foto' : 'fotos'}
         </p>
       )}
 
