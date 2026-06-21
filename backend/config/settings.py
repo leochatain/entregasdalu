@@ -135,6 +135,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 ACCOUNT_ADAPTER = "diary.adapters.AllowlistAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "diary.adapters.AllowlistSocialAccountAdapter"
+# Skip allauth's "you are about to sign in with Google" interstitial: a plain GET
+# on /accounts/google/login/ goes straight to Google. Safe for one trusted user —
+# the only provider is Google and there's nothing to confirm. (Our SignIn button is
+# a GET <a href>, which would otherwise land on that confirmation page.)
+SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
