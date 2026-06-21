@@ -81,9 +81,9 @@ export default function Stats() {
               color: pct > 0.5 ? '#fafafa' : '#2a2a28',
             }
           } else if (future) {
-            style = { color: '#c4c4c0', border: '1px solid #ededea' }
+            style = { color: '#a6a6a0', border: '1px solid #e4e4e0' }
           } else {
-            style = { color: '#bdbdb8', border: '1px dashed #dcdcd8' }
+            style = { color: '#909089', border: '1px dashed #d2d2cc' }
           }
           if (isToday) style.boxShadow = '0 0 0 2px #1a1a1a'
 

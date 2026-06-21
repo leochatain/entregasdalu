@@ -39,10 +39,10 @@ export default function NavBar({ active, onNavigate, onSignOut }: NavBarProps) {
             type="button"
             aria-current={isActive ? 'page' : undefined}
             onClick={() => onNavigate?.(view)}
-            className={`focus-visible:outline-accent cursor-pointer border-b-2 font-mono text-[13px] tracking-[.16em] whitespace-nowrap uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+            className={`focus-visible:outline-accent relative cursor-pointer font-mono text-[13px] tracking-[.16em] whitespace-nowrap uppercase transition-colors after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:rounded-full after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 ${
               isActive
-                ? 'text-accent border-accent'
-                : 'text-muted hover:text-ink border-transparent'
+                ? 'text-accent after:bg-accent'
+                : 'text-muted hover:text-ink after:bg-transparent'
             }`}
           >
             {label}

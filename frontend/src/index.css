@@ -16,8 +16,8 @@
   --color-ink: #1a1a1a; /* primary text, default CTA fill */
   --color-ink-2: #2a2a28; /* secondary text in panels */
   --color-muted: #5a5a58; /* body / secondary copy */
-  --color-muted-2: #8a8a86; /* captions, italic asides */
-  --color-faint: #b5b5b0; /* weekday labels, disabled day numbers */
+  --color-muted-2: #73736d; /* captions, italic asides */
+  --color-faint: #8f8f88; /* weekday labels, disabled day numbers */
   --color-accent: #d11f1f; /* the red — logo, active nav, %, progress, selection */
   --color-chip-bg: #f0f0ed; /* courier pill background */
   --color-panel: #f4f4f2; /* fail message panel */
