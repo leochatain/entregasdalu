@@ -1,0 +1,23 @@
+# entregasdalu — reverse proxy + TLS + SPA host (design.md §7.2).
+# Caddy auto-provisions HTTPS for $DOMAIN via Let's Encrypt. Three dynamic prefixes
+# go to Django; /photos is proxied (not static) so the downscaling resize view
+# applies in prod too (deliberate deviation from §7.2). Everything else is the SPA
+# with an index.html fallback (no react-router; client-side state switch).
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy web:8000
+	}
+	handle /accounts/* {
+		reverse_proxy web:8000
+	}
+	handle /photos/* {
+		reverse_proxy web:8000
+	}
+	handle {
+		root * /srv/www
+		try_files {path} /index.html
+		file_server
+	}
+}

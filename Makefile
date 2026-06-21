@@ -1,7 +1,8 @@
-# entregasdalu — one-word dev targets. Backend lives in backend/ and uses uv.
-# Frontend targets are placeholders until the SPA build is wired up.
+# entregasdalu — one-word dev targets. Backend lives in backend/ and uses uv;
+# frontend in frontend/ (npm); prod deploy is docker-compose (see DEPLOY.md).
 
 BACKEND := backend
+FRONTEND := frontend
 # Run uv from inside backend/ so pytest/pyright pick up backend/pyproject.toml config.
 RUN := cd $(BACKEND) && uv run
 
@@ -9,7 +10,8 @@ RUN := cd $(BACKEND) && uv run
 DEV_ENV := DEBUG=True DEV_LOGIN_ENABLED=True ALLOWED_EMAILS=leochatain@gmail.com \
 	DEV_LOGIN_EMAIL=leochatain@gmail.com
 
-.PHONY: help install migrate makemigrations dev run test lint format typecheck check openapi
+.PHONY: help install migrate makemigrations dev run test lint format typecheck check openapi \
+	fe-install fe-dev fe-build fe-gen deploy down logs ps
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -45,3 +47,29 @@ openapi:  ## Print the OpenAPI schema (FE codegen source)
 	cd $(BACKEND) && DJANGO_SETTINGS_MODULE=config.settings uv run python -c \
 		"import django; django.setup(); from diary.api import api; import json; \
 		print(json.dumps(api.get_openapi_schema(), indent=2))"
+
+# --- Frontend (npm) -------------------------------------------------------
+fe-install:  ## Install frontend deps (npm ci)
+	cd $(FRONTEND) && npm ci
+
+fe-dev:  ## Run the Vite dev server (proxies /api to :8000)
+	cd $(FRONTEND) && npm run dev
+
+fe-build:  ## Production build of the SPA (vite build)
+	cd $(FRONTEND) && npm run build
+
+fe-gen:  ## Regenerate src/api/generated.ts from a running backend (:8000)
+	cd $(FRONTEND) && npm run gen:api
+
+# --- Production (docker-compose; see DEPLOY.md) ---------------------------
+deploy:  ## Build images and (re)start the stack detached
+	docker compose up -d --build
+
+down:  ## Stop the stack
+	docker compose down
+
+logs:  ## Follow logs from both services
+	docker compose logs -f
+
+ps:  ## Show service status
+	docker compose ps

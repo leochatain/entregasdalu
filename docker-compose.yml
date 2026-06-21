@@ -1,0 +1,32 @@
+# entregasdalu — the entire deploy is `docker compose up -d --build` (design.md §7.1).
+# Two services, no DB/redis/celery. Reads secrets/config from a repo-root .env.
+services:
+  web:
+    build: ./backend
+    env_file: .env
+    volumes:
+      - ./data:/data # SQLite app.db (rw) + the thumbs cache (DATABASE_PATH/THUMBS_ROOT)
+      - ./photos:/srv/photos:ro # offer-time listdir + the resize view read photos here
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  caddy:
+    build:
+      context: . # repo root, so the image build can reach frontend/
+      dockerfile: caddy/Dockerfile
+    env_file: .env # provides $DOMAIN to the Caddyfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data # ACME certs (named volume; a different container from web's /data)
+      - caddy_config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+
+# caddy serves no photos itself — it proxies /photos/* to web, so no photos mount here.
+volumes:
+  caddy_data:
+  caddy_config:

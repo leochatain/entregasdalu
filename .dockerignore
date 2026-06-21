@@ -1,0 +1,25 @@
+# Root build context (caddy image). Keep it small; never leak host data/ or photos/.
+.git
+.gitignore
+.github
+data/
+photos/
+prototype/
+.playwright-mcp/
+*.md
+.env
+.env.*
+.DS_Store
+
+# Frontend build inputs that must not enter the image context
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Backend (its own image uses backend/.dockerignore; exclude heavy dirs here too)
+backend/.venv/
+backend/staticfiles/
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.ruff_cache/

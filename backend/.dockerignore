@@ -1,0 +1,10 @@
+# Web image build context (./backend). Deps come from the lockfile, not .venv.
+.venv/
+staticfiles/
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.python-version
+Dockerfile
+.dockerignore
