@@ -51,6 +51,9 @@ if DEV_LOGIN_ENABLED and not DEBUG:
 # so local dev and the compose bind-mounts share one set of paths (CLAUDE.md).
 PHOTOS_ROOT = Path(os.environ.get("PHOTOS_ROOT", REPO_ROOT / "photos"))
 DATABASE_PATH = Path(os.environ.get("DATABASE_PATH", REPO_ROOT / "data" / "app.db"))
+# Throwaway cache for downscaled photo derivatives (diary/images.py). Reproducible
+# from the originals, so it's safe to delete — kept out of the irreplaceable data/app.db.
+THUMBS_ROOT = Path(os.environ.get("THUMBS_ROOT", REPO_ROOT / "data" / "thumbs"))
 
 INSTALLED_APPS = [
     "django.contrib.admin",

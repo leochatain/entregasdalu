@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { type CSSProperties, useEffect, useState } from 'react'
 
 /**
  * The Mosaic — the highest-correctness component (frontend.md §8, spec §3.2/§4).
@@ -14,6 +14,12 @@ import { useEffect, useState } from 'react'
  *
  * Grid is an app-wide FROZEN constant: 8 rows × 6 cols = 48, row-major,
  * idx = row*6 + col. Never change its meaning — past entries are read against it.
+ *
+ * Rendering: ONE <img> behind a grid of 48 lightweight frost overlays. The photo
+ * decodes and paints once; only the cheap opacity overlays vary per tile. (The
+ * old build painted the full image into 48 background layers and ran a
+ * backdrop-filter blur on each — ~100 MB decoded bitmaps and 48 blur layers per
+ * mosaic, which the gallery multiplied by every submitted day. This is that fix.)
  */
 
 export const MOSAIC_COLS = 6
@@ -23,14 +29,26 @@ export const MOSAIC_TILES = MOSAIC_COLS * MOSAIC_ROWS // 48
 /** Per-tile pop-in stagger (prototype's `step`). */
 const STAGGER_MS = 17
 
+/** Near-opaque frost. Solid enough to hide the sharp photo without a (costly)
+ * backdrop-filter blur — the old overlay was already 96.5% opaque, so this reads
+ * essentially the same while removing the single most expensive effect. */
+const FROST = 'rgba(241,243,246,0.985)'
+
+/** Shared positioning for the two 6×8 overlay grids (frost + grid lines). */
+const gridLayer: CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  display: 'grid',
+  gridTemplateColumns: `repeat(${MOSAIC_COLS}, 1fr)`,
+  gridTemplateRows: `repeat(${MOSAIC_ROWS}, 1fr)`,
+}
+
 export interface MosaicProps {
   photoUrl: string
   /** Tile indices (0..47) to show un-frosted, in reveal order. */
   litTiles: number[]
   /** Pop the tiles in one-by-one (Reveal screen only). */
   animate?: boolean
-  /** Padding/gap between tiles, px. */
-  gap?: number
   /** Container corner radius, px. */
   radius?: number
 }
@@ -39,7 +57,6 @@ export default function Mosaic({
   photoUrl,
   litTiles,
   animate = false,
-  gap = 0,
   radius = 6,
 }: MosaicProps) {
   const reduced = usePrefersReducedMotion()
@@ -77,50 +94,43 @@ export default function Mosaic({
       role="img"
       aria-label={`foto revelada ${pct}%`}
       style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${MOSAIC_COLS}, 1fr)`,
-        gridTemplateRows: `repeat(${MOSAIC_ROWS}, 1fr)`,
-        gap: `${gap}px`,
-        padding: `${gap}px`,
+        position: 'relative',
         aspectRatio: `${MOSAIC_COLS} / ${MOSAIC_ROWS}`,
         width: '100%',
         backgroundColor: '#e2e5e9',
         borderRadius: `${radius}px`,
         overflow: 'hidden',
-        boxSizing: 'border-box',
       }}
     >
-      {Array.from({ length: MOSAIC_TILES }, (_, idx) => {
-        const r = Math.floor(idx / MOSAIC_COLS)
-        const c = idx % MOSAIC_COLS
-        const rank = rankByIdx.get(idx)
-        const lit = rank !== undefined
-        const posX = (c / (MOSAIC_COLS - 1)) * 100
-        const posY = (r / (MOSAIC_ROWS - 1)) * 100
-        const delay = shouldAnimate && lit ? rank * STAGGER_MS : 0
-        const revealed = lit && started
-        return (
-          <div
-            key={idx}
-            aria-hidden
-            style={{
-              position: 'relative',
-              backgroundColor: '#e9ebee',
-              backgroundImage: `url("${photoUrl}")`,
-              backgroundSize: `${MOSAIC_COLS * 100}% ${MOSAIC_ROWS * 100}%`,
-              backgroundPosition: `${posX}% ${posY}%`,
-              border: '1px solid rgba(45,55,70,0.2)',
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-            }}
-          >
+      {/* Single decode, single paint. lazy/async keeps offscreen gallery tiles cheap. */}
+      <img
+        src={photoUrl}
+        alt=""
+        aria-hidden
+        loading="lazy"
+        decoding="async"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+      />
+      {/* Fading frost: one cell per tile, hides the photo until its tile is lit. */}
+      <div style={gridLayer}>
+        {Array.from({ length: MOSAIC_TILES }, (_, idx) => {
+          const rank = rankByIdx.get(idx)
+          const lit = rank !== undefined
+          const delay = shouldAnimate && lit ? rank * STAGGER_MS : 0
+          const revealed = lit && started
+          return (
             <div
+              key={idx}
+              aria-hidden
               style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(239,241,245,0.965)',
-                backdropFilter: 'blur(9px) saturate(0.5)',
-                WebkitBackdropFilter: 'blur(9px) saturate(0.5)',
+                background: FROST,
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55)',
                 opacity: revealed ? 0 : 1,
                 transform: revealed ? 'scale(1.1)' : 'scale(1)',
@@ -133,9 +143,22 @@ export default function Mosaic({
                 willChange: 'opacity, transform',
               }}
             />
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
+      {/* Static grid lines: always visible over both revealed and frosted tiles,
+          so the mosaic reads as tiled even where the photo shows through. */}
+      <div style={gridLayer} aria-hidden>
+        {Array.from({ length: MOSAIC_TILES }, (_, idx) => (
+          <div
+            key={idx}
+            style={{
+              border: '1px solid rgba(45,55,70,0.2)',
+              boxSizing: 'border-box',
+            }}
+          />
+        ))}
+      </div>
     </div>
   )
 }
