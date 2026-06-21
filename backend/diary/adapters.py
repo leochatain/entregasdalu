@@ -16,6 +16,13 @@ from django.http import HttpResponseForbidden
 
 
 class AllowlistSocialAccountAdapter(DefaultSocialAccountAdapter):
+    def is_open_for_signup(self, request: Any, sociallogin: Any) -> bool:
+        # Google signup must stay OPEN so first-time login can create the user.
+        # The allowlist below is the real gate. (allauth's default delegates this
+        # to the *account* adapter, which closes local signup — that would also
+        # block first social login, hence this override.)
+        return True
+
     def pre_social_login(self, request: Any, sociallogin: Any) -> None:
         email = (getattr(sociallogin.user, "email", "") or "").lower()
         if email not in settings.ALLOWED_EMAILS:
