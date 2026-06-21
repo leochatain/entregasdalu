@@ -17,6 +17,11 @@ data/*.db-shm
 # Downscaled photo derivatives — a regenerable cache (diary/images.py)
 data/thumbs/
 
+# Curated photos are personal content, not source — keep the tier folders
+# (drop-points for curation) but never commit the images themselves.
+photos/*/*
+!photos/*/.gitkeep
+
 # Playwright MCP scratch (screenshots, snapshots, console logs)
 .playwright-mcp/
 
