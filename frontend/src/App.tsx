@@ -32,7 +32,7 @@ export default function App() {
   const data = today.data
 
   return (
-    <div className="min-h-screen pt-[46px]">
+    <div className="min-h-screen pt-[60px]">
       <NavBar
         active={view}
         onNavigate={setView}

@@ -27,13 +27,13 @@ export default function Gallery() {
         Galeria
       </h1>
       {data && (
-        <p className="text-muted mt-2 font-mono text-[13px]">
+        <p className="text-muted mt-2 font-mono text-[15px]">
           {data.photosCollected} fotos · {percentLabel(acervo)} do acervo
         </p>
       )}
 
       {isLoading ? (
-        <p className="text-muted-2 mt-10 font-mono text-[13px]">carregando…</p>
+        <p className="text-muted-2 mt-10 font-mono text-[15px]">carregando…</p>
       ) : !data || data.items.length === 0 ? (
         <p className="text-muted-2 mt-10 font-serif text-[18px] italic">
           ainda nada por aqui. a primeira entrega começa a galeria.
@@ -52,10 +52,10 @@ export default function Gallery() {
                 litTiles={entry.revealedTiles}
               />
               <div className="flex items-baseline justify-between">
-                <span className="text-muted-2 font-mono text-[11px]">
+                <span className="text-muted-2 font-mono text-[13px]">
                   {formatShortDate(entry.date)}
                 </span>
-                <span className="text-accent font-mono text-[11px]">
+                <span className="text-accent font-mono text-[13px]">
                   {percentLabel(entry.performancePct)}
                 </span>
               </div>
@@ -83,7 +83,7 @@ export default function Gallery() {
             <p className="text-bg mt-4 text-center font-serif text-[20px]">
               {open.name} · {percentLabel(open.performancePct)}
             </p>
-            <p className="mt-1 text-center font-mono text-[12px] text-[#c9c4bf]">
+            <p className="mt-1 text-center font-mono text-[14px] text-[#c9c4bf]">
               {formatShortDate(open.date)} · {open.effectiveWordCount} palavras
             </p>
             <CtaButton

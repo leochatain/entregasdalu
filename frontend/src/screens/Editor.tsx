@@ -29,7 +29,7 @@ export default function Editor({
           <h1 className="text-ink font-serif text-[30px] font-medium">
             {picked.name}
           </h1>
-          <span aria-live="polite" className="text-muted font-mono text-[13px]">
+          <span aria-live="polite" className="text-muted font-mono text-[15px]">
             {countLabel(words, picked.wordTarget)}
           </span>
         </div>
@@ -55,7 +55,7 @@ export default function Editor({
         </div>
       </div>
 
-      <aside className="sticky top-[70px] flex-[0_0_220px]">
+      <aside className="sticky top-[84px] flex-[0_0_220px]">
         <Eyebrow className="tracking-[.2em]">você está revelando</Eyebrow>
         <div className="mt-4 w-[160px] opacity-90">
           <Mosaic photoUrl={picked.photoUrl} litTiles={[picked.seedTile]} />

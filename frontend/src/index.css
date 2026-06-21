@@ -31,6 +31,8 @@
   /* Type families */
   --font-serif: 'Newsreader', Georgia, serif;
   --font-mono: 'Courier Prime', monospace;
+  --font-display:
+    'Instrument Serif', Georgia, serif; /* the wordmark / masthead */
 
   /* Bespoke type scale (named, not scattered arbitrary values) */
   --text-hero: clamp(48px, 8.4vw, 128px);
@@ -42,7 +44,7 @@
   --text-lead--line-height: 1.6;
   --text-editor: 19px;
   --text-editor--line-height: 1.75;
-  --text-eyebrow: 11px;
+  --text-eyebrow: 13px;
   --text-eyebrow--line-height: 1.4;
   --text-eyebrow--letter-spacing: 0.24em;
 

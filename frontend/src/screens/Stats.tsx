@@ -11,7 +11,7 @@ export default function Stats() {
   if (!data) {
     return (
       <main className="mx-auto max-w-[920px] px-6 py-14">
-        <p className="text-muted-2 font-mono text-[13px]">carregando…</p>
+        <p className="text-muted-2 font-mono text-[15px]">carregando…</p>
       </main>
     )
   }
@@ -46,7 +46,7 @@ export default function Stats() {
             <span className="text-ink font-serif text-[32px] font-medium">
               {c.num}
             </span>
-            <span className="text-muted-2 font-mono text-[11px] tracking-[.08em] uppercase">
+            <span className="text-muted-2 font-mono text-[13px] tracking-[.08em] uppercase">
               {c.label}
             </span>
           </div>
@@ -57,7 +57,7 @@ export default function Stats() {
         {WEEKDAYS.map((w) => (
           <div
             key={w}
-            className="text-faint text-center font-mono text-[10px] tracking-[.1em] uppercase"
+            className="text-faint text-center font-mono text-[12px] tracking-[.1em] uppercase"
           >
             {w}
           </div>
@@ -91,7 +91,7 @@ export default function Stats() {
             <div
               key={iso}
               style={style}
-              className="flex aspect-square items-start justify-end rounded-[4px] p-1.5 font-mono text-[11px]"
+              className="flex aspect-square items-start justify-end rounded-[4px] p-1.5 font-mono text-[13px]"
             >
               {day}
             </div>
@@ -99,7 +99,7 @@ export default function Stats() {
         })}
       </div>
 
-      <div className="text-muted-2 mt-6 flex items-center gap-2 font-mono text-[11px]">
+      <div className="text-muted-2 mt-6 flex items-center gap-2 font-mono text-[13px]">
         menos
         <span className="bg-line h-3 w-3 rounded-[3px]" />
         <span className="h-3 w-3 rounded-[3px] bg-[rgba(26,26,26,0.4)]" />

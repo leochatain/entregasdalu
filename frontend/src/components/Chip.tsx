@@ -9,7 +9,7 @@ export default function Chip({
 }: ComponentPropsWithoutRef<'span'>) {
   return (
     <span
-      className={`bg-chip-bg text-muted inline-block rounded-full px-[15px] py-[7px] font-mono text-[12px] tracking-[.06em] ${className}`}
+      className={`bg-chip-bg text-muted inline-block rounded-full px-[15px] py-[7px] font-mono text-[14px] tracking-[.06em] ${className}`}
       {...props}
     />
   )

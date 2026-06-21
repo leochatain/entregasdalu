@@ -44,14 +44,14 @@ export default function TierCard({
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-ink text-[26px] font-medium">{name}</span>
         <span
-          className={`font-mono text-[10px] tracking-[.1em] uppercase ${
+          className={`font-mono text-[12px] tracking-[.1em] uppercase ${
             selected ? 'text-accent' : 'text-tag-warm'
           }`}
         >
           {tag}
         </span>
       </div>
-      <div className="text-muted-2 font-mono text-[12px] tracking-[.08em]">
+      <div className="text-muted-2 font-mono text-[14px] tracking-[.08em]">
         meta: {formatNumber(wordTarget)} palavras
       </div>
     </button>
